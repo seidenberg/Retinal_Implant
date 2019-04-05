@@ -42,6 +42,7 @@ Also known as "how do I get the arc length of a circle"
 - I have literally nothing else to say because the scikit-image link GIVES YOU the gabor filterbanks
 - If in openCV then [OpenCV documentation of gabor filters](https://docs.opencv.org/3.0-beta/modules/imgproc/doc/filtering.html#getgaborkernel) you'll have to make your own filter bank
 
-- Break the image up into X by X squares ~~technically circle that can overlap~~ ((RFsize=0.072⋅RFeccentricity+0.017) as reflected in the measurements of Hubel and Wiesel) 
+- Break the image up into X by X squares ~~technically circles that can overlap~~ 
+> ((RFsize=0.072⋅RFeccentricity+0.017) as reflected in the measurements of Hubel and Wiesel) 
 
 - Copy and paste the code that convolves each square by its "best approximation" of the gabor filter
