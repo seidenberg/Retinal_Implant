@@ -24,7 +24,8 @@ from numpy import exp, sin, cos, pi
 
 # open a dialog to select the input image and store its path
 image_path = filedialog.askopenfilename()
-# path to test file: 'C:/Users/epsei/Desktop/Studium/nsc/CSS/Exercises/Ex_Visual/Images/All_images/IMG_3545.jpg'
+# TODO: Uncomment interactive file selection instead of test file path
+# image_path = 'C:/Users/epsei/Desktop/Studium/nsc/CSS/Exercises/Ex_Visual/Images/All_images/IMG_3545.jpg'
 
 # read in the selected image
 image = plt.imread(image_path)
@@ -41,10 +42,11 @@ image = plt.imread(image_path)
 
 # print(image.shape, x_max, y_max, largest_distance)
 
+# TODO: Set reasonable parameters or implement interactive mode to change parameters online
 # set the number of different orientations used as requested by the exercise instructions
 n_orientations = 6
 # set the width of the kernel (representing a square shaped receptive field) in pixels
-kernel_width = 5
+kernel_width = 20
 # define the width of the gaussian envelope (standard deviation)
 std_dev = 0.5
 # set the ellipticity of the gaussian to 1 (circular)
@@ -67,13 +69,26 @@ x_primes = [x * cos(orientation) + y * sin(orientation) for orientation in orien
 y_primes = [-x * sin(orientation) + y * cos(orientation) for orientation in orientations]
 
 # compute all kernels applying the Gabor function to each value and store them all into a list
-kernels = [np.array(exp(-(x_prime ** 2 + ellipticity ** 2 * y_prime ** 2) / 2 * std_dev ** 2) * cos(2 * pi * x_prime / wavelength + phase_shift), dtype=np.float32) for x_prime, y_prime in zip(x_primes, y_primes)]
+kernels = [np.array(exp(-(x_prime ** 2 + ellipticity ** 2 * y_prime ** 2) / (2 * std_dev ** 2)) * cos(2 * pi * x_prime / wavelength + phase_shift), dtype=np.float32) for x_prime, y_prime in zip(x_primes, y_primes)]
 
 # convert the image to grayscale and store it in matrix form
-image_sw = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)/255.
+image_sw = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image_sw_filtered = np.zeros(image_sw.shape, dtype=np.float32)
+# compute how many times the side of a kernel fits into the height of the image and round it up
+im_height_in_kernels = int(np.ceil(image_sw.shape[0]/kernel_width))
+# compute how many times the side of a kernel fits into the width of the image and round it up
+im_width_in_kernels = int(np.ceil(image_sw.shape[1]/kernel_width))
+# split up the image into kernel-sized squares
+for i in range(im_height_in_kernels):
+    for j in range(im_width_in_kernels):
+        current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
+        filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+        image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
 
-filtered = cv2.filter2D(image_sw, cv2.CV_32F, kernels[0])
+cv2.imshow('v1 simulation', image_sw_filtered)
+# filtered = cv2.filter2D(image_sw, cv2.CV_32F, kernels[2])
 
+# cv2.imshow('test', filtered)
 # filter the image with every kernel and store the results in a list
 # filtered = [cv2.filter2D(image_sw, cv2.CV_32F, kernel) for kernel in kernels]
 
