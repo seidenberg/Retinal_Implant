@@ -24,7 +24,7 @@ from numpy import exp, sin, cos, pi
 
 # open a dialog to select the input image and store its path
 image_path = filedialog.askopenfilename()
-# TODO: Uncomment interactive file selection instead of test file path
+# (TODO: Uncomment interactive file selection instead of test file path)
 # image_path = 'C:/Users/epsei/Desktop/Studium/nsc/CSS/Exercises/Ex_Visual/Images/All_images/IMG_3545.jpg'
 
 # read in the selected image
@@ -46,15 +46,15 @@ image = plt.imread(image_path)
 # set the number of different orientations used as requested by the exercise instructions
 n_orientations = 6
 # set the width of the kernel (representing a square shaped receptive field) in pixels
-kernel_width = 20
+kernel_width = 5
 # define the width of the gaussian envelope (standard deviation)
 std_dev = 0.5
 # set the ellipticity of the gaussian to 1 (circular)
-ellipticity = 1
+ellipticity = .3
 # set the phase offset of the wave function (cosine factor in the Gabor function) to 0
 phase_shift = 0
 # set the wavelength to some reasonable value
-wavelength = 1
+wavelength = .5
 
 
 # set the orientations of features to which the filter should be most responsive as requested in the exercise (use radians)
@@ -83,10 +83,26 @@ for i in range(im_height_in_kernels):
     for j in range(im_width_in_kernels):
         current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
         filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+        # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
         image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
 
-cv2.imshow('v1 simulation', image_sw_filtered)
+# split up the image into kernel-sized squares
+# for i in range(im_height_in_kernels):
+#     for j in range(im_width_in_kernels):
+#         current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
+#         filtered_blocks = np.array([cv2.filter2D(current_block, cv2.CV_32F, kernel) / 255 for kernel in kernels], dtype=np.float32)
+#         # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+#         image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
+
+cropped_height = 1000
+
+print(int(cropped_height / image_sw_filtered.shape[1] * image_sw_filtered.shape[0]))
+
+cv2.imshow('v1 simulation', cv2.resize(image_sw_filtered, (cropped_height, int(cropped_height / image_sw.shape[1] * image_sw.shape[0]))))
+
+
 # filtered = cv2.filter2D(image_sw, cv2.CV_32F, kernels[2])
+
 
 # cv2.imshow('test', filtered)
 # filter the image with every kernel and store the results in a list
