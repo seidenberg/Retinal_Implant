@@ -30,9 +30,12 @@ image_path = filedialog.askopenfilename()
 # read in the selected image
 image = plt.imread(image_path)
 # display the image so that a fixation point can be selected TODO: add caption
-# plt.imshow(image)
+plt.imshow(image)
+
 # allow exactly one selection and store the rounded coordinates of the selected fixation point
 # fixation_point = np.round(np.array(plt.ginput(1)))
+
+#%%
 # # store the larger of the two distances from fixation point to left and right side of the image.
 # x_max = max(image.shape[0]-fixation_point[0][0], fixation_point[0][0])
 # # store the larger of the two distances from fixation point to top and bottom of the image
@@ -46,11 +49,11 @@ image = plt.imread(image_path)
 # set the number of different orientations used as requested by the exercise instructions
 n_orientations = 6
 # set the width of the kernel (representing a square shaped receptive field) in pixels
-kernel_width = 5
+kernel_width = 40
 # define the width of the gaussian envelope (standard deviation)
-std_dev = 0.5
+std_dev = 1
 # set the ellipticity of the gaussian to 1 (circular)
-ellipticity = .3
+ellipticity = .7
 # set the phase offset of the wave function (cosine factor in the Gabor function) to 0
 phase_shift = 0
 # set the wavelength to some reasonable value
@@ -79,27 +82,37 @@ im_height_in_kernels = int(np.ceil(image_sw.shape[0]/kernel_width))
 # compute how many times the side of a kernel fits into the width of the image and round it up
 im_width_in_kernels = int(np.ceil(image_sw.shape[1]/kernel_width))
 # split up the image into kernel-sized squares
-for i in range(im_height_in_kernels):
-    for j in range(im_width_in_kernels):
-        current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
-        filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
-        # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
-        image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
-
-# split up the image into kernel-sized squares
 # for i in range(im_height_in_kernels):
 #     for j in range(im_width_in_kernels):
 #         current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
-#         filtered_blocks = np.array([cv2.filter2D(current_block, cv2.CV_32F, kernel) / 255 for kernel in kernels], dtype=np.float32)
-#         # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+#         filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+        # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
 #         image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
+
+images_sw_filtered = [np.zeros(image_sw.shape, dtype=np.float32) for i in range(n_orientations)]
+
+# split up the image into kernel-sized squares
+for i in range(im_height_in_kernels):
+    for j in range(im_width_in_kernels):
+        current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
+        filtered_blocks = np.array([cv2.filter2D(current_block, cv2.CV_32F, kernel) / 255 for kernel in kernels], dtype=np.float32)
+        # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+        image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
+
+        # for k in range(n_orientations):
+        #     images_sw_filtered[k][kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = filtered_blocks[k]
 
 cropped_height = 1000
 
 print(int(cropped_height / image_sw_filtered.shape[1] * image_sw_filtered.shape[0]))
 
+
+
 cv2.imshow('v1 simulation', cv2.resize(image_sw_filtered, (cropped_height, int(cropped_height / image_sw.shape[1] * image_sw.shape[0]))))
 
+# for i in range(n_orientations):
+#     cv2.imshow(str(i*30) + ' degrees', cv2.resize(images_sw_filtered[i], (cropped_height, int(cropped_height / image_sw.shape[1] * image_sw.shape[0]))))
+#     cv2.waitKey()
 
 # filtered = cv2.filter2D(image_sw, cv2.CV_32F, kernels[2])
 
