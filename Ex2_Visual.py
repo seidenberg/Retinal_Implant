@@ -24,8 +24,6 @@ eye_radius = 1.25
 screen_height = 30
 display_length = 60
 
-
-
 # %%
 
 # open a dialog to select the input image and store its path
@@ -101,6 +99,7 @@ def plotFilter(show):
 def mexicanHat(x, y, sigma1):
     return gaussian2D(x, y, sigma1) - np.abs(gaussian2D(x, y, sigma1 * 1.6))
 
+
 # %%
 # Making Zones
 Zones = np.zeros((10, image.shape[0], image.shape[1]))
@@ -151,7 +150,6 @@ cv2.imwrite('ganglion_cell_output_equalized.jpg', final_product_equalized * 255)
 cv2.imwrite('ganglion_cell_output.jpg', final_product)
 print('ganglion cell output saved')
 
-
 # %% Primary visual cortex simulation
 
 # TODO: Set reasonable parameters (the ones here work well for the Door and Lena images)
@@ -168,7 +166,6 @@ phase_shift = 0
 # set the wavelength to some reasonable value
 wavelength = .5
 
-
 # set the orientations of features to which the filter should be most responsive as requested in the exercise (use radians)
 orientations = np.linspace(0, 150, n_orientations) * pi / 180
 # place the pixels on the side of the kernel on a space from -1 to 1
@@ -181,16 +178,17 @@ x_primes = [x * cos(orientation) + y * sin(orientation) for orientation in orien
 y_primes = [-x * sin(orientation) + y * cos(orientation) for orientation in orientations]
 
 # compute all kernels applying the Gabor function to each value and store them all into a list
-kernels = [np.array(exp(-(x_prime ** 2 + ellipticity ** 2 * y_prime ** 2) / (2 * std_dev ** 2)) * cos(2 * pi * x_prime / wavelength + phase_shift), dtype=np.float32) for x_prime, y_prime in zip(x_primes, y_primes)]
+kernels = [np.array(exp(-(x_prime ** 2 + ellipticity ** 2 * y_prime ** 2) / (2 * std_dev ** 2)) * cos(
+    2 * pi * x_prime / wavelength + phase_shift), dtype=np.float32) for x_prime, y_prime in zip(x_primes, y_primes)]
 
 # convert the image to grayscale and store it in matrix form
 image_sw = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 # memory allocation
 image_sw_filtered = np.zeros(image_sw.shape, dtype=np.float32)
 # compute how many times the side of a kernel fits into the height of the image and round it up
-im_height_in_kernels = int(np.ceil(image_sw.shape[0]/kernel_width))
+im_height_in_kernels = int(np.ceil(image_sw.shape[0] / kernel_width))
 # compute how many times the side of a kernel fits into the width of the image and round it up
-im_width_in_kernels = int(np.ceil(image_sw.shape[1]/kernel_width))
+im_width_in_kernels = int(np.ceil(image_sw.shape[1] / kernel_width))
 
 # %% debugging step for individual orientation kernels
 # split up the image into kernel-sized squares
@@ -198,7 +196,7 @@ im_width_in_kernels = int(np.ceil(image_sw.shape[1]/kernel_width))
 #     for j in range(im_width_in_kernels):
 #         current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
 #         filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
-        # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
+# filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
 #         image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
 
 # %% filtering step
@@ -209,16 +207,19 @@ images_sw_filtered = [np.zeros(image_sw.shape, dtype=np.float32) for i in range(
 # split up the image into kernel-sized squares
 for i in range(im_height_in_kernels):
     for j in range(im_width_in_kernels):
-        current_block = image_sw[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width]
+        current_block = image_sw[kernel_width * i:kernel_width * i + kernel_width,
+                        kernel_width * j:kernel_width * j + kernel_width]
         # filter the current block using kernel and normalize
-        filtered_blocks = np.array([cv2.filter2D(current_block, cv2.CV_32F, kernel) for kernel in kernels], dtype=np.float32)
+        filtered_blocks = np.array([cv2.filter2D(current_block, cv2.CV_32F, kernel) for kernel in kernels],
+                                   dtype=np.float32)
         # filtered_blocks = np.array([current_block * kernel[:current_block.shape[0],:current_block.shape[1]] /255 for kernel in kernels], dtype=np.float32)
-        image_sw_filtered[kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = sum(filtered_blocks) / n_orientations
+        image_sw_filtered[kernel_width * i:kernel_width * i + kernel_width,
+        kernel_width * j:kernel_width * j + kernel_width] = sum(filtered_blocks) / n_orientations
 
 # normalize
 image_sw_filtered_normalized = image_sw_filtered / 255
-        # for k in range(n_orientations):
-        #     images_sw_filtered[k][kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = filtered_blocks[k]
+# for k in range(n_orientations):
+#     images_sw_filtered[k][kernel_width*i:kernel_width*i + kernel_width, kernel_width*j:kernel_width*j + kernel_width] = filtered_blocks[k]
 
 # set the output height for the final display
 cropped_height = 1000
@@ -226,7 +227,8 @@ cropped_height = 1000
 
 
 # show the filtered image
-cv2.imshow('v1 simulation', cv2.resize(image_sw_filtered_normalized, (cropped_height, int(cropped_height / image_sw.shape[1] * image_sw.shape[0]))))
+cv2.imshow('v1 simulation', cv2.resize(image_sw_filtered_normalized,
+                                       (cropped_height, int(cropped_height / image_sw.shape[1] * image_sw.shape[0]))))
 
 # store the filtered image
 cv2.imwrite('v1_output.jpg', image_sw_filtered)
@@ -244,7 +246,6 @@ print('stored v1 output')
 # cv2.imshow('test', filtered)
 # filter the image with every kernel and store the results in a list
 # filtered = [cv2.filter2D(image_sw, cv2.CV_32F, kernel) for kernel in kernels]
-
 
 
 # cv2.imshow(sum(filtered))
