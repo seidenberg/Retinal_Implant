@@ -1,20 +1,11 @@
 import numpy as np 
-import matplotlib
 import math
 
 
-# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import skimage
 from tkinter import filedialog
-from scipy import ndimage
-from skimage.color import rgb2gray
-import PIL
-import scipy
 import cv2
-import os
 
-import matplotlib.image as mpimg
 import scipy.signal as signal
 #%%
 def displayImage(image):
